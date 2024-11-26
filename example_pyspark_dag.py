@@ -9,6 +9,7 @@ default_args = {
     'depends_on_past': False,
     'retries': 1,
 }
+
 with DAG(
     dag_id="example_pyspark_dag",
     default_args=default_args,
@@ -19,7 +20,15 @@ with DAG(
     tags=["example"],
 ) as dag:
 
-    @task.pyspark(conn_id="spark-local")  # Use Spark locally
+    @task.pyspark(
+        conn_id="spark-local",
+        config_kwargs={
+            "spark.driver.memory": "1g",
+            "spark.executor.memory": "1g",
+            "spark.executor.cores": "1",
+            "spark.python.version": "3"
+        }
+    )
     def spark_task(spark: SparkSession) -> None:
         # Create a simple DataFrame
         df = spark.createDataFrame(
@@ -32,6 +41,7 @@ with DAG(
         )
         # Show DataFrame content in logs
         df.show()
+        return "Success!"
 
     # Define task in the DAG
     task1 = spark_task()
