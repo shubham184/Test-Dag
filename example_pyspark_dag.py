@@ -3,7 +3,6 @@ from airflow.decorators import task
 from datetime import datetime
 from pyspark.sql import SparkSession
 
-# Define the DAG
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -13,8 +12,8 @@ default_args = {
 with DAG(
     dag_id="example_pyspark_dag",
     default_args=default_args,
-    description="Simple DAG using PySpark",
-    schedule_interval=None,  # Run manually
+    description="Simple PySpark on K8s DAG",
+    schedule_interval=None,
     start_date=datetime(2023, 11, 1),
     catchup=False,
     tags=["example"],
@@ -23,14 +22,18 @@ with DAG(
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
+            "spark.kubernetes.driver.request.cores": "0.5",
+            "spark.kubernetes.driver.limit.cores": "1",
             "spark.driver.memory": "1g",
+            "spark.kubernetes.executor.request.cores": "0.5",
+            "spark.kubernetes.executor.limit.cores": "1",
             "spark.executor.memory": "1g",
-            "spark.executor.cores": "1",
-            "spark.python.version": "3"
+            "spark.executor.instances": "1",
+            "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
     def spark_task(spark: SparkSession) -> None:
-        # Create a simple DataFrame
+        print("Starting Spark task...")
         df = spark.createDataFrame(
             [
                 (1, "John Doe", 21),
@@ -39,9 +42,9 @@ with DAG(
             ],
             ["id", "name", "age"],
         )
-        # Show DataFrame content in logs
+        print("Created DataFrame:")
         df.show()
+        print("Task completed successfully!")
         return "Success!"
 
-    # Define task in the DAG
     task1 = spark_task()
