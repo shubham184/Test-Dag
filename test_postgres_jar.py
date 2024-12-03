@@ -24,19 +24,30 @@ with DAG(
             "spark.executor.instances": "1",
             
             # Volume mounts
-            "spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark/jars",
+            "spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark-jars",
             "spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-jars.mount.name": "spark-jars-pvc",
-            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark/jars",
-            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.name": "spark-jars-pvc"
+            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark-jars",
+            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.name": "spark-jars-pvc",
+            
+            # Classpath configuration
+            "spark.driver.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
+            "spark.executor.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar"
         }
     )
     def test_spark_jdbc(spark: SparkSession) -> None:
-        print("Testing Spark session...")
+        print("Testing Spark session with JDBC driver...")
         
         # List the contents of the mounted directory
         import subprocess
-        print("Contents of /opt/spark/jars:")
-        subprocess.run(["ls", "-l", "/opt/spark/jars"])
+        print("Contents of /opt/spark-jars:")
+        subprocess.run(["ls", "-l", "/opt/spark-jars"])
+        
+        # Test JDBC driver loading
+        try:
+            spark.sparkContext._jvm.Class.forName("org.postgresql.Driver")
+            print("Successfully loaded PostgreSQL JDBC driver!")
+        except Exception as e:
+            print(f"Error loading PostgreSQL JDBC driver: {str(e)}")
         
         # Simple test
         df = spark.createDataFrame([(1, "test")], ["id", "value"])
