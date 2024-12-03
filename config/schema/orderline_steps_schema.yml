@@ -1,0 +1,116 @@
+channel1_orderline-steps:
+  table_name: channel1_orderline-steps
+  primary_key: relationship_id
+  nested_tables:
+    - name: evidencePhotos
+      field: evidencePhotos
+      target_table: channel1_orderline-steps_evidencePhotos
+      foreign_key: orderline_steps_id 
+      source_key: relationship_id
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: _id
+    - name: ID
+      type: string
+    - name: agentID
+      type: string
+    - name: approvalRequestedTo
+      type: string
+    - name: clientID
+      type: string
+    - name: compliantAtVerificationDate
+      type: boolean
+    - name: cpSupplierID
+      type: string
+    - name: createdAt
+      type: string
+    - name: createdBy
+      type: string
+    - name: currentlyValidCertificates
+      type: string
+    - name: delegatedCompanyID
+      type: string
+    - name: displayName
+      type: string
+    - name: evidencePhotos
+      type: array<map<string,string>>
+
+channel1_orderline-steps_evidencePhotos:
+  table_name: channel1_orderline-steps_evidencePhotos
+  primary_key: ID
+  parent_table: channel1_orderline-steps
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: orderline_steps_id
+    - name: createdAt
+      type: string
+    - name: createdBy
+      type: string
+    - name: docUrl
+      type: string
+    - name: fileHash
+      type: string
+    - name: fileName
+      type: string
+    - name: fileType
+      type: string
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: referenceNo
+      type: string
+    - name: rejectionReason
+      type: string
+    - name: status
+      type: integer
+  table_name: channel1_order_orderLines
+  primary_key: lineID
+  parent_table: channel1_order
+  is_array: true
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: order_id
+    - name: brandName
+      type: string
+    - name: certificate
+      type: string
+    - name: colourway
+      type: string
+    - name: comment
+      type: string
+    - name: compositionMainFabric
+      type: string
+    - name: compositionSecondFabric
+      type: string
+    - name: etd
+      type: string
+    - name: lineID
+      type: string
+    - name: orderLinePhase
+      type: integer
+    - name: orderLineStatus
+      type: integer
+    - name: productGroup
+      type: integer
+    - name: productPictureUrls
+      type: string
+    - name: productQualityRef
+      type: string
+    - name: qrCodeRef
+      type: string
+    - name: repeat
+      type: string
+    - name: season
+      type: string
+    - name: showNewsLetter
+      type: string
+    - name: styleName
+      type: string
+    - name: styleNumber
+      type: string
+    - name: totalQuantityPerCw
+      type: string

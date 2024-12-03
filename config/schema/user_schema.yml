@@ -1,0 +1,86 @@
+channel1_user:
+  table_name: channel1_user
+  primary_key: relationship_id
+  nested_tables:
+    - name: topbrands
+      field: topBrands
+      target_table: channel1_user_topbrands
+      foreign_key: user_id
+      source_key: relationship_id
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: _id
+    - name: company
+      type: map<string,string>
+    - name: companyID
+      type: string
+    - name: companyRole
+      type: string
+    - name: createdAt
+      type: string
+    - name: email
+      type: string
+    - name: firstName
+      type: string
+    - name: isAdmin
+      type: boolean
+    - name: isBlocked
+      type: boolean
+    - name: lastName
+      type: string
+    - name: phone
+      type: string
+    - name: status
+      type: string
+    - name: userID
+      type: string
+    - name: userProfilePics
+      type: string
+    - name: userType
+      type: string
+    - name: invitedByCompanyEmailID
+      type: string
+    - name: invitedByCompanyID
+      type: string
+    - name: invitedByCompanyName
+      type: string
+    - name: topBrands
+      type: array<map<string,string>>
+
+channel1_user_topbrands:
+  table_name: channel1_user_topbrands
+  primary_key: id
+  parent_table: channel1_user
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: user_id
+      type: string
+      source_field: relationship_id
+    - name: brandID
+      type: string
+    - name: brandLogoURL
+      type: string
+    - name: brandName
+      type: string
+    - name: brandURL
+      type: string
+    - name: contact
+      type: string
+    - name: email
+      type: string
+    - name: nextStepIntroText
+      type: string
+    - name: nextStepSubtitle
+      type: string
+    - name: phone
+      type: string
+    - name: productFootprintDesc
+      type: string
+    - name: stepNote
+      type: string
+    - name: steps
+      type: string

@@ -1,0 +1,266 @@
+channel1_order:
+  table_name: channel1_order
+  primary_key: relationship_id
+  nested_tables:
+    - name: fabric
+      field: fabric
+      target_table: channel1_order_fabric
+      foreign_key: order_id
+      source_key: relationship_id
+    - name: orderlines
+      field: orderLines
+      target_table: channel1_order_orderlines
+      foreign_key: order_id
+      source_key: relationship_id
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: _id
+    - name: ID
+      type: string
+    - name: acceptedAt
+      type: string
+    - name: allQrCodesGenerated
+      type: string
+    - name: cancelledAt
+      type: string
+    - name: createdAt
+      type: string
+    - name: createdBy
+      type: string
+    - name: currency
+      type: string
+    - name: delegateCompanyID
+      type: string
+      default: "00000000-0000-0000-0000-000000000000"
+    - name: file
+      type: string
+    - name: fromCompanyID
+      type: string
+      default: "00000000-0000-0000-0000-000000000000"
+    - name: invoiceID
+      type: string
+    - name: invoicePaymentID
+      type: string
+    - name: orderItemID
+      type: string
+    - name: orderName
+      type: string
+    - name: orderNumber
+      type: string
+    - name: orderRefID
+      type: string
+    - name: orderRequestID
+      type: string
+    - name: paymentPeriod
+      type: string
+    - name: price
+      type: integer
+    - name: repeat
+      type: string
+    - name: season
+      type: string
+    - name: terms
+      type: string
+    - name: tier1NotifiedDate
+      type: string
+    - name: timeZone
+      type: string
+    - name: toCompany
+      type: map<string,string>
+    - name: toCompanyID
+      type: string
+      default: "00000000-0000-0000-0000-000000000000"
+    - name: updatedAt
+      type: string
+    - name: updatedBy
+      type: string
+    - name: userID
+      type: string
+    - name: validateDate
+      type: string
+    - name: vatRate
+      type: string
+    - name: agentCompanyID
+      type: string
+      default: "00000000-0000-0000-0000-000000000000"
+    - name: delegatedAt
+      type: string
+    - name: footprintDeadline
+      type: string
+    - name: footprintFlag
+      type: string
+    - name: finalFootprintStatus
+      type: string
+    - name: footprintFilledByCompanyID
+      type: string
+      default: "00000000-0000-0000-0000-000000000000"
+    - name: language
+      type: string
+    - name: views
+      type: string
+    - name: orderLines
+      type: array<map<string,string>>
+    - name: fabric
+      type: struct
+      fields:
+        - name: fabricFootprint
+          type: string
+        - name: footprintStatus
+          type: string
+        - name: transportStatus
+          type: string
+        - name: transport
+          type: string
+
+channel1_order_orderlines:
+  table_name: channel1_order_orderlines
+  primary_key: nested_id
+  parent_table: channel1_order
+  is_array: true
+  fields:
+    - name: nested_id
+      type: string
+      generated: true
+    - name: relationship_id
+      type: string
+      source_field: order_id
+    - name: brandName
+      type: string
+    - name: certificate
+      type: string
+    - name: colourway
+      type: string
+    - name: comment
+      type: string
+    - name: compositionMainFabric
+      type: string
+    - name: compositionSecondFabric
+      type: string
+    - name: etd
+      type: string
+    - name: lineID
+      type: string
+    - name: orderLinePhase
+      type: integer
+    - name: orderLineStatus
+      type: integer
+    - name: productGroup
+      type: integer
+    - name: productPictureUrls
+      type: string
+    - name: productQualityRef
+      type: string
+    - name: qrCodeRef
+      type: string
+    - name: repeat
+      type: string
+    - name: season
+      type: string
+    - name: showNewsLetter
+      type: string
+    - name: styleName
+      type: string
+    - name: styleNumber
+      type: string
+    - name: totalQuantityPerCw
+      type: string
+
+channel1_order_fabric:
+  table_name: channel1_order_fabric
+  primary_key: id
+  foreign_key: order_id
+  parent_table: channel1_order
+  nested_tables:
+    - name: fabricFootprint
+      field: fabricFootprint
+      target_table: channel1_order_fabric_Footprint
+      foreign_key: parent_id
+      source_key: id
+      use_nested_transformer: true
+  is_array: false
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: order_id
+      type: string
+      source_field: relationship_id
+    - name: footprintStatus
+      type: string
+    - name: fabricFootprint
+      type: string
+    - name: transportStatus
+      type: string
+    - name: transport
+      type: string
+
+
+channel1_order_fabric_Footprint:
+  table_name: channel1_order_fabric_Footprint
+  primary_key: nested_id
+  parent_table: channel1_order_fabric
+  is_array: true
+  nested_field: true
+  path: 
+    - field: fabric
+      parent: channel1_order
+    - field: fabricFootprint
+      parent: channel1_order_fabric
+  source_id_field: ID
+  fields:
+    - name: nested_id
+      type: string
+      generated: true
+    - name: id
+      type: string
+      generated: true
+    - name: parent_id
+      type: string
+      source_field: id
+    - name: energySupportingDocument
+      type: string
+    - name: fabricType
+      type: string
+    - name: fabricUnit
+      type: string
+    - name: fabricWeight
+      type: string
+    - name: fabricWidth
+      type: string
+    - name: fiberFabric
+      type: string
+    - name: filledByCompanyID
+      type: string
+    - name: filledByPrimarySource
+      type: string
+    - name: loopYarn
+      type: string
+    - name: provideEnergyFlag
+      type: string
+    - name: reference
+      type: string
+    - name: sequence
+      type: string
+    - name: solarEnergy
+      type: string
+    - name: status
+      type: string
+    - name: stepID
+      type: string
+    - name: thermalEnergy
+      type: string
+    - name: toCompanyUser
+      type: string
+    - name: total
+      type: string
+    - name: totalElectricEnergy
+      type: string
+    - name: warp
+      type: string
+    - name: weft
+      type: string
+    - name: windEnergy
+      type: string
+    - name: yarnFabric
+      type: string

@@ -1,0 +1,23 @@
+# Development database configuration
+development:
+  postgres:
+    host: 'localhost'
+    port: '5432'
+    user: 'admin'
+    password: 'admin'
+    database: 'tt-spark-dev'
+  
+  couchdb:
+    url: 'https://couchdb:4Ze7WOaVB3OoWYH13seSIdt9@tex-tracer.redledger.eu'
+
+# Test configuration (if needed)
+test:
+  postgres:
+    host: 'localhost'
+    port: '5432'
+    user: 'test'
+    password: 'test'
+    database: 'tt-spark-test'
+
+# Default environment
+environment: 'development'

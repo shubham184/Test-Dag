@@ -1,0 +1,640 @@
+channel1_company:
+  table_name: channel1_company
+  primary_key: relationship_id
+  nested_tables:
+    - name: categories
+      field: categories
+      target_table: channel1_company_categories
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: productGroups
+      field: productGroups
+      target_table: channel1_company_productGroups
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: companySubtypes
+      field: companySubtypes
+      target_table: channel1_company_companySubtypes
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: sustainability
+      field: sustainability
+      target_table: channel1_company_sustainability
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: social
+      field: social
+      target_table: channel1_company_social
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: officeAddresses
+      field: officeAddresses
+      target_table: channel1_company_officeAddresses
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: factoryAddresses
+      field: factoryAddresses
+      target_table: channel1_company_factoryAddresses
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: profilePics
+      field: profilePics
+      target_table: channel1_company_profilePics
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: topBrands
+      field: topBrands
+      target_table: channel1_company_topBrands
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: admin
+      field: admin
+      target_table: channel1_company_admin
+      foreign_key: company_id
+      source_key: relationship_id
+    - name: contact
+      field: contact
+      target_table: channel1_company_contact
+      foreign_key: company_id
+      source_key: relationship_id
+  fields:
+    - name: relationship_id
+      type: string
+      source_field: _id
+    - name: ID
+      type: string
+    - name: Industry
+      type: string
+    - name: amlStatus
+      type: string
+    - name: authorisationCode
+      type: string
+    - name: blockReason
+      type: string
+    - name: brands
+      type: string
+    - name: businessType
+      type: string
+    - name: collectionperYear
+      type: string
+    - name: companyID
+      type: string
+    - name: companyType
+      type: integer
+    - name: compemail
+      type: string
+    - name: country
+      type: string
+    - name: countryName
+      type: string
+    - name: createdAt
+      type: string
+    - name: createdBy
+      type: string
+    - name: email
+      type: string
+    - name: employees
+      type: integer
+    - name: factoryAddressDiffers
+      type: boolean
+    - name: femaleEmployees
+      type: integer
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: isBlocked
+      type: boolean
+    - name: joiningApprovedAt
+      type: string
+    - name: kycStatus
+      type: string
+    - name: maleEmployees
+      type: integer
+    - name: modifiedAt
+      type: string
+    - name: monthlyCapacity
+      type: integer
+    - name: name
+      type: string
+    - name: phone
+      type: string
+    - name: profile
+      type: string
+    - name: regNumber
+      type: string
+    - name: regNumberParent
+      type: string
+    - name: rejectionReason
+      type: string
+    - name: resubmitReason
+      type: string
+    - name: site
+      type: string
+    - name: tax
+      type: string
+    - name: tier1Email
+      type: string
+    - name: turnover
+      type: integer
+    - name: turnoverCurrency
+      type: string
+    - name: unblockReason
+      type: string
+    - name: userID
+      type: string
+    - name: categories
+      type: array<integer>
+    - name: companySubtypes
+      type: array<integer>
+    - name: productGroups
+      type: array<integer>
+    - name: sustainability
+      type: array<map<string,string>>
+    - name: social
+      type: array<map<string,string>>
+    - name: officeAddresses
+      type: array<map<string,string>>
+    - name: factoryAddresses
+      type: array<map<string,string>>
+    - name: profilePics
+      type: array<map<string,string>>
+    - name: topBrands
+      type: array<map<string,string>>
+    - name: admin
+      type: struct
+      fields:
+        - name: email
+          type: string
+        - name: firstName
+          type: string
+        - name: lastName
+          type: string
+        - name: mobile
+          type: string
+        - name: phone
+          type: string
+        - name: title
+          type: string
+    - name: contact
+      type: struct
+      fields:
+        - name: email
+          type: string
+        - name: firstName
+          type: string
+        - name: lastName
+          type: string
+        - name: phone
+          type: string
+        - name: city
+          type: string
+        - name: country
+          type: string
+        - name: line1
+          type: string
+        - name: line2
+          type: string
+        - name: postal
+          type: string
+
+
+channel1_company_categories:
+  table_name: channel1_company_categories
+  primary_key: id
+  foreign_key: company_id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    - name: category  # Use singular form
+      type: integer
+
+channel1_company_productGroups:
+  table_name: channel1_company_productGroups
+  primary_key: id
+  foreign_key: company_id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    - name: productGroup
+      type: integer
+
+channel1_company_companySubtypes:
+  table_name: channel1_company_companySubtypes
+  primary_key: id
+  foreign_key: company_id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    - name: companySubtype
+      type: integer
+
+channel1_company_sustainability:
+  table_name: channel1_company_sustainability
+  primary_key: nested_id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: nested_id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    # All fields from sustainability items
+    - name: Doc
+      type: boolean
+    - name: ID
+      type: string
+    - name: certificateType
+      type: string
+    - name: createdAt
+      type: string
+    - name: description
+      type: string
+    - name: docURL
+      type: string
+    - name: femScore
+      type: string
+    - name: fileHash
+      type: string
+    - name: fileName
+      type: string
+    - name: fileType
+      type: string
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: issuanceDate
+      type: string
+    - name: issuer
+      type: string
+    - name: licenseID
+      type: string
+    - name: membershipID
+      type: string
+    - name: oekoClass
+      type: string
+    - name: otherCertName
+      type: string
+    - name: owner
+      type: string
+    - name: referenceIssuer
+      type: string
+    - name: source
+      type: string
+    - name: status
+      type: string
+    - name: title
+      type: string
+    - name: type
+      type: integer
+    - name: updatedAt
+      type: string
+    - name: validFromDate
+      type: string
+    - name: validtoDate
+      type: string
+
+channel1_company_social:
+  table_name: channel1_company_social
+  primary_key: id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    # All fields from social items
+    - name: Doc
+      type: boolean
+    - name: ID
+      type: string
+    - name: certificateType
+      type: string
+    - name: createdAt
+      type: string
+    - name: description
+      type: string
+    - name: docURL
+      type: string
+    - name: femScore
+      type: string
+    - name: fileHash
+      type: string
+    - name: fileName
+      type: string
+    - name: fileType
+      type: string
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: issuanceDate
+      type: string
+    - name: issuer
+      type: string
+    - name: licenseID
+      type: string
+    - name: membershipID
+      type: string
+    - name: oekoClass
+      type: string
+    - name: otherCertName
+      type: string
+    - name: owner
+      type: string
+    - name: referenceIssuer
+      type: string
+    - name: source
+      type: string
+    - name: status
+      type: string
+    - name: title
+      type: string
+    - name: type
+      type: integer
+    - name: updatedAt
+      type: string
+    - name: validFromDate
+      type: string
+    - name: validtoDate
+      type: string
+
+channel1_company_officeAddresses:
+  table_name: channel1_company_officeAddresses
+  primary_key: id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    # All fields from officeAddresses items except 'companySubtypes'
+    - name: ID
+      type: string
+    - name: addressStatus
+      type: string
+    - name: city
+      type: string
+    - name: country
+      type: string
+    - name: currentAddress
+      type: boolean
+    - name: employees
+      type: integer
+    - name: endDate
+      type: string
+    - name: facilityType
+      type: string
+    - name: femaleEmployees
+      type: integer
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: line1
+      type: string
+    - name: line2
+      type: string
+    - name: maleEmployees
+      type: integer
+    - name: monthlyCapacity
+      type: integer
+    - name: monthlyCapacityUnit
+      type: string
+    - name: officeName
+      type: string
+    - name: position
+      type: integer
+    - name: postal
+      type: string
+    - name: sequence
+      type: integer
+    - name: startDate
+      type: string
+    - name: state
+      type: string
+
+
+channel1_company_factoryAddresses:
+  table_name: channel1_company_factoryAddresses
+  primary_key: id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    # All fields from factoryAddresses items except 'companySubtypes'
+    - name: ID
+      type: string
+    - name: addressStatus
+      type: string
+    - name: city
+      type: string
+    - name: country
+      type: string
+    - name: currentAddress
+      type: boolean
+    - name: employees
+      type: integer
+    - name: endDate
+      type: string
+    - name: facilityType
+      type: string
+    - name: femaleEmployees
+      type: integer
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: line1
+      type: string
+    - name: line2
+      type: string
+    - name: maleEmployees
+      type: integer
+    - name: monthlyCapacity
+      type: integer
+    - name: monthlyCapacityUnit
+      type: string
+    - name: officeName
+      type: string
+    - name: position
+      type: integer
+    - name: postal
+      type: string
+    - name: sequence
+      type: integer
+    - name: startDate
+      type: string
+    - name: state
+      type: string
+
+channel1_company_profilePics:
+  table_name: channel1_company_profilePics
+  primary_key: id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    # All fields from profilePics items
+    - name: ID
+      type: string
+    - name: addressID
+      type: string
+    - name: createdAt
+      type: string
+    - name: createdBy
+      type: string
+    - name: docURL
+      type: string
+    - name: fileHash
+      type: string
+    - name: fileName
+      type: string
+    - name: fileType
+      type: string
+    - name: geoLat
+      type: float
+    - name: geoLong
+      type: float
+    - name: isMainPicture
+      type: boolean
+    - name: owner
+      type: string
+    - name: sequence
+      type: integer
+    - name: source
+      type: string
+    - name: updatedAt
+      type: string
+
+channel1_company_topBrands:
+  table_name: channel1_company_topBrands
+  primary_key: nested_id
+  parent_table: channel1_company
+  is_array: true
+  fields:
+    - name: nested_id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+      source_field: relationship_id
+    - name: brandID
+      type: string
+    - name: brandLogoURL
+      type: string
+    - name: brandName
+      type: string
+    - name: brandURL
+      type: string
+    - name: contact
+      type: string
+    - name: email
+      type: string
+    - name: nextStepIntroText
+      type: string
+    - name: nextStepSubtitle
+      type: string
+    - name: phone
+      type: string
+    - name: productFootprintDesc
+      type: string
+    - name: stepNote
+      type: string
+    - name: steps
+      type: string
+
+
+channel1_company_admin:
+  table_name: channel1_company_admin
+  primary_key: id
+  foreign_key: company_id
+  parent_table: channel1_company
+  is_array: false
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+    - name: email
+      type: string
+    - name: firstName
+      type: string
+    - name: lastName
+      type: string
+    - name: mobile
+      type: string
+    - name: phone
+      type: string
+    - name: title
+      type: string
+
+channel1_company_contact:
+  table_name: channel1_company_contact
+  primary_key: id
+  foreign_key: company_id
+  parent_table: channel1_company
+  is_array: false
+  fields:
+    - name: id
+      type: string
+      generated: true
+    - name: company_id
+      type: string
+    - name: email
+      type: string
+    - name: firstName
+      type: string
+    - name: lastName
+      type: string
+    - name: phone
+      type: string
+    - name: city
+      type: string
+    - name: country
+      type: string
+    - name: line1
+      type: string
+    - name: line2
+      type: string
+    - name: postal
+      type: string
+
