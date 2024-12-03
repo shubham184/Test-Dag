@@ -19,8 +19,10 @@ with DAG(
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
-            "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
-            "spark.driver.extraClassPath": "/home/airflow/.ivy2/jars/org.postgresql_postgresql-42.7.3.jar",
+            # "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+            # "spark.driver.extraClassPath": "/home/airflow/.ivy2/jars/org.postgresql_postgresql-42.7.3.jar",
+            "spark.driver.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
+            "spark.executor.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
             "spark.kubernetes.driver.request.cores": "0.5",
             "spark.kubernetes.driver.limit.cores": "1",
             "spark.driver.memory": "1g",
@@ -33,11 +35,6 @@ with DAG(
     )
     def test_spark_jdbc(spark: SparkSession) -> None:
         print("Testing Spark session with JDBC driver...")
-        ivy_cache_dir = os.path.expanduser("~/.ivy2/jars")
-        print(f"Ivy cache directory: {ivy_cache_dir}")
-        for root, dirs, files in os.walk(ivy_cache_dir):
-            for file in files:
-                print(os.path.join(root, file))
 
         # Test JDBC driver loading
         try:
