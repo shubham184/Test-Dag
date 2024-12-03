@@ -19,6 +19,7 @@ with DAG(
         conn_id="spark-local",
         config_kwargs={
             "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+            "spark.driver.extraClassPath": "/home/airflow/.ivy2/jars/org.postgresql_postgresql-42.7.3.jar",
             "spark.kubernetes.driver.request.cores": "0.5",
             "spark.kubernetes.driver.limit.cores": "1",
             "spark.driver.memory": "1g",
