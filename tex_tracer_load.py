@@ -67,7 +67,7 @@ with DAG(
             "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
-    def process_database(spark, db_name: str, config: dict):  # Fixed parameter order
+    def process_database(db_name: str, config: dict, spark=None):  # Fixed parameter order
         """Process a single database"""
         try:
             # Initialize transformer based on database name
@@ -115,8 +115,9 @@ with DAG(
     database_tasks = []
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
         database_tasks.append(
-            process_database(db_name, config)  # Fixed parameter order here too
+            process_database(db_name=db_name, config=config)
         )
+
 
     # Set dependencies
     config >> database_tasks
