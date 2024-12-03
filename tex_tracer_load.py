@@ -13,13 +13,13 @@ sys.path.append(src_dir)
 # Import your existing modules
 from src.common.spark_session import create_spark_session
 from src.common.config_loader import ConfigLoader
-from src.common.couchdb_client import fetch_data_from_couchdb
-from src.common.postgres_loader import load_data_to_postgres
 from src.models.schema_loader import SchemaLoader
 from src.transformers.user_transformer import UserTransformer
 from src.transformers.company_transformer import CompanyTransformer
 from src.transformers.order_transformer import OrderTransformer
 from src.transformers.orderline_steps_transformer import OrderlineStepsTransformer
+from src.common.couchdb_client import fetch_data_from_couchdb
+from src.common.postgres_loader import load_data_to_postgres
 
 default_args = {
     'owner': 'airflow',
@@ -57,19 +57,17 @@ with DAG(
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
-            "spark.driver.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
-            "spark.executor.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
             "spark.kubernetes.driver.request.cores": "0.5",
             "spark.kubernetes.driver.limit.cores": "1",
-            "spark.driver.memory": "4g",
+            "spark.driver.memory": "1g",
             "spark.kubernetes.executor.request.cores": "0.5",
             "spark.kubernetes.executor.limit.cores": "1",
-            "spark.executor.memory": "4g",
+            "spark.executor.memory": "1g",
             "spark.executor.instances": "1",
             "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
-    def process_database(spark, config, db_name):
+    def process_database(spark, db_name: str, config: dict):  # Fixed parameter order
         """Process a single database"""
         try:
             # Initialize transformer based on database name
@@ -117,7 +115,7 @@ with DAG(
     database_tasks = []
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
         database_tasks.append(
-            process_database(config, db_name)
+            process_database(db_name, config)  # Fixed parameter order here too
         )
 
     # Set dependencies
