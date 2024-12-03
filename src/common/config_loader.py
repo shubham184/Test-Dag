@@ -15,13 +15,15 @@ class ConfigLoader:
         return config[environment]
 
     @staticmethod
-    def get_postgres_config(config_path: str = 'pyspark_etl_project/config/database_config.yml') -> Dict[str, Any]:
+    def get_postgres_config(config_dir: str = None) -> Dict[str, Any]:
         """Load PostgreSQL configuration"""
+        config_path = os.path.join(config_dir or '', 'database_config.yml')
         config = ConfigLoader.load_config(config_path)
         return config['postgres']
 
     @staticmethod
-    def get_couchdb_config(config_path: str = 'pyspark_etl_project/config/database_config.yml') -> Dict[str, Any]:
+    def get_couchdb_config(config_dir: str = None) -> Dict[str, Any]:
         """Load CouchDB configuration"""
+        config_path = os.path.join(config_dir or '', 'database_config.yml')
         config = ConfigLoader.load_config(config_path)
         return config['couchdb']

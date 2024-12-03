@@ -44,7 +44,7 @@ from src.common.postgres_loader import load_data_to_postgres
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'retries': 1,
+    'retries': 0,
 }
 
 with DAG(
@@ -61,28 +61,22 @@ with DAG(
     def load_configurations():
         """Load all configurations needed for the ETL process"""
         try:
-            # Log current working directory and its contents
-            logger.info(f"Current working directory: {os.getcwd()}")
-            logger.info(f"DAG directory contents: {os.listdir(dag_dir)}")
+            # Get absolute paths
+            dag_dir = os.path.dirname(os.path.abspath(__file__))
+            config_dir = os.path.join(dag_dir, 'config')
+            schema_dir = os.path.join(config_dir, 'schema')
             
-            # Use absolute path for schema config
-            schema_path = os.path.join(dag_dir, 'config', 'schema')
-            logger.info(f"Looking for schema config in: {schema_path}")
+            logger.info(f"Loading configurations from config directory: {config_dir}")
             
-            if os.path.exists(schema_path):
-                logger.info(f"Schema directory exists and contains: {os.listdir(schema_path)}")
-            else:
-                logger.error(f"Schema directory not found at: {schema_path}")
-                logger.info(f"Parent directory ({os.path.dirname(schema_path)}) contains: {os.listdir(os.path.dirname(schema_path))}")
-
-            # Use absolute path when loading schema config
-            schema_config = SchemaLoader.load_schema_config(schema_path)
+            # Load schema config with absolute path
+            schema_config = SchemaLoader.load_schema_config(schema_dir)
             logger.info("Successfully loaded schema config")
             
-            db_params = ConfigLoader.get_postgres_config()
+            # Load database configs with absolute path
+            db_params = ConfigLoader.get_postgres_config(config_dir)
             logger.info("Successfully loaded postgres config")
             
-            couchdb_config = ConfigLoader.get_couchdb_config()
+            couchdb_config = ConfigLoader.get_couchdb_config(config_dir)
             logger.info("Successfully loaded couchdb config")
             
             return {
