@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.decorators import task
 from datetime import datetime
 from pyspark.sql import SparkSession
+import os
 
 default_args = {
     'owner': 'airflow',
