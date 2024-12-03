@@ -18,41 +18,31 @@ with DAG(
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
-            # Basic resource configs
+            "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+            "spark.kubernetes.driver.request.cores": "0.5",
+            "spark.kubernetes.driver.limit.cores": "1",
             "spark.driver.memory": "1g",
+            "spark.kubernetes.executor.request.cores": "0.5",
+            "spark.kubernetes.executor.limit.cores": "1",
             "spark.executor.memory": "1g",
             "spark.executor.instances": "1",
-            
-            # Volume mounts
-            "spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark-jars",
-            "spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-jars.mount.name": "spark-jars-pvc",
-            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.path": "/opt/spark-jars",
-            "spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-jars.mount.name": "spark-jars-pvc",
-            
-            # Classpath configuration
-            "spark.driver.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar",
-            "spark.executor.extraClassPath": "/opt/spark-jars/postgresql-42.7.3.jar"
+            "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
     def test_spark_jdbc(spark: SparkSession) -> None:
         print("Testing Spark session with JDBC driver...")
-        
-        # List the contents of the mounted directory
-        import subprocess
-        print("Contents of /opt/spark-jars:")
-        subprocess.run(["ls", "-l", "/opt/spark-jars"])
-        
+
         # Test JDBC driver loading
         try:
             spark.sparkContext._jvm.Class.forName("org.postgresql.Driver")
             print("Successfully loaded PostgreSQL JDBC driver!")
         except Exception as e:
             print(f"Error loading PostgreSQL JDBC driver: {str(e)}")
-        
+
         # Simple test
         df = spark.createDataFrame([(1, "test")], ["id", "value"])
         df.show()
-        
+
         return "Success!"
 
     test_task = test_spark_jdbc()
