@@ -31,13 +31,8 @@ with DAG(
             "spark.executor.memory": "4g",
             "spark.executor.instances": "1",
             
-            # Init container to download JDBC driver
-            "spark.kubernetes.driver.initContainers": '[{"name": "init-jdbc", "image": "curlimages/curl", "command": ["curl", "-o", "/opt/spark/jars/postgresql-42.7.3.jar", "https://jdbc.postgresql.org/download/postgresql-42.7.3.jar"], "volumeMounts": [{"name": "spark-jars", "mountPath": "/opt/spark/jars"}]}]',
-            "spark.kubernetes.executor.initContainers": '[{"name": "init-jdbc", "image": "curlimages/curl", "command": ["curl", "-o", "/opt/spark/jars/postgresql-42.7.3.jar", "https://jdbc.postgresql.org/download/postgresql-42.7.3.jar"], "volumeMounts": [{"name": "spark-jars", "mountPath": "/opt/spark/jars"}]}]',
-            
-            # Volume mounts for the downloaded jar
-            "spark.kubernetes.driver.volumes.emptyDir.spark-jars.mount.path": "/opt/spark/jars",
-            "spark.kubernetes.executor.volumes.emptyDir.spark-jars.mount.path": "/opt/spark/jars",
+            # JDBC driver configuration - Spark will handle the distribution
+            "spark.jars": "https://jdbc.postgresql.org/download/postgresql-42.7.3.jar",
             
             # Your existing spark configs
             "spark.sql.shuffle.partitions": "10",
@@ -56,18 +51,27 @@ with DAG(
     def test_spark_jdbc(spark: SparkSession) -> None:
         print("Testing Spark session with JDBC driver...")
         
-        # Verify JDBC driver is available
-        import subprocess
-        print("Listing files in /opt/spark/jars:")
-        subprocess.run(["ls", "-l", "/opt/spark/jars"])
+        # Print Spark configuration
+        print("\nSpark Configuration:")
+        for item in spark.sparkContext.getConf().getAll():
+            print(f"{item[0]}: {item[1]}")
         
-        # Create a test DataFrame
+        # Create and test a simple DataFrame
         test_df = spark.createDataFrame([
             (1, "Test1"),
             (2, "Test2")
         ], ["id", "name"])
         
+        print("\nTest DataFrame:")
         test_df.show()
+        
+        # Try to load the JDBC driver class to verify it's available
+        try:
+            spark.sparkContext._jvm.Class.forName("org.postgresql.Driver")
+            print("\nSuccessfully loaded PostgreSQL JDBC driver!")
+        except Exception as e:
+            print(f"\nError loading PostgreSQL JDBC driver: {str(e)}")
+        
         return "Success!"
 
     test_task = test_spark_jdbc()
