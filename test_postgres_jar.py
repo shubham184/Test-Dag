@@ -32,6 +32,11 @@ with DAG(
     )
     def test_spark_jdbc(spark: SparkSession) -> None:
         print("Testing Spark session with JDBC driver...")
+        ivy_cache_dir = os.path.expanduser("~/.ivy2/jars")
+        print(f"Ivy cache directory: {ivy_cache_dir}")
+        for root, dirs, files in os.walk(ivy_cache_dir):
+            for file in files:
+                print(os.path.join(root, file))
 
         # Test JDBC driver loading
         try:
