@@ -62,20 +62,21 @@ with DAG(
         """Load all configurations needed for the ETL process"""
         try:
             # Log current working directory and its contents
-            cwd = os.getcwd()
-            logger.info(f"Current working directory: {cwd}")
-            log_directory_structure(cwd)
+            logger.info(f"Current working directory: {os.getcwd()}")
+            logger.info(f"DAG directory contents: {os.listdir(dag_dir)}")
             
-            # Log specific paths we're trying to access
-            config_path = os.path.join(cwd, 'config/schema/')
-            logger.info(f"Attempting to access config path: {config_path}")
-            if os.path.exists(config_path):
-                logger.info(f"Config directory exists and contains: {os.listdir(config_path)}")
+            # Use absolute path for schema config
+            schema_path = os.path.join(dag_dir, 'config', 'schema')
+            logger.info(f"Looking for schema config in: {schema_path}")
+            
+            if os.path.exists(schema_path):
+                logger.info(f"Schema directory exists and contains: {os.listdir(schema_path)}")
             else:
-                logger.warning(f"Config directory does not exist: {config_path}")
+                logger.error(f"Schema directory not found at: {schema_path}")
+                logger.info(f"Parent directory ({os.path.dirname(schema_path)}) contains: {os.listdir(os.path.dirname(schema_path))}")
 
-            # Try to load configurations
-            schema_config = SchemaLoader.load_schema_config('config/schema/')
+            # Use absolute path when loading schema config
+            schema_config = SchemaLoader.load_schema_config(schema_path)
             logger.info("Successfully loaded schema config")
             
             db_params = ConfigLoader.get_postgres_config()
@@ -92,7 +93,7 @@ with DAG(
         except Exception as e:
             logger.error(f"Configuration loading failed: {str(e)}")
             logger.error(f"Error type: {type(e)}")
-            logger.error(f"Error trace:", exc_info=True)
+            logger.error("Stack trace:", exc_info=True)
             raise
 
     @task.pyspark(
