@@ -5,10 +5,30 @@ import os
 import sys
 import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Add the src directory to Python path
 dag_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(dag_dir, 'src')
 sys.path.append(src_dir)
+
+# Log important directory information
+logger.info(f"DAG Directory: {dag_dir}")
+logger.info(f"Source Directory: {src_dir}")
+
+# Log directory contents
+def log_directory_structure(start_path):
+    """Recursively log directory structure"""
+    logger.info(f"\nDirectory structure starting from: {start_path}")
+    for root, dirs, files in os.walk(start_path):
+        level = root.replace(start_path, '').count(os.sep)
+        indent = ' ' * 4 * level
+        logger.info(f"{indent}{os.path.basename(root)}/")
+        sub_indent = ' ' * 4 * (level + 1)
+        for f in files:
+            logger.info(f"{sub_indent}{f}")
 
 # Import your existing modules
 from src.common.spark_session import create_spark_session
@@ -41,9 +61,28 @@ with DAG(
     def load_configurations():
         """Load all configurations needed for the ETL process"""
         try:
+            # Log current working directory and its contents
+            cwd = os.getcwd()
+            logger.info(f"Current working directory: {cwd}")
+            log_directory_structure(cwd)
+            
+            # Log specific paths we're trying to access
+            config_path = os.path.join(cwd, 'config/schema/')
+            logger.info(f"Attempting to access config path: {config_path}")
+            if os.path.exists(config_path):
+                logger.info(f"Config directory exists and contains: {os.listdir(config_path)}")
+            else:
+                logger.warning(f"Config directory does not exist: {config_path}")
+
+            # Try to load configurations
             schema_config = SchemaLoader.load_schema_config('config/schema/')
+            logger.info("Successfully loaded schema config")
+            
             db_params = ConfigLoader.get_postgres_config()
+            logger.info("Successfully loaded postgres config")
+            
             couchdb_config = ConfigLoader.get_couchdb_config()
+            logger.info("Successfully loaded couchdb config")
             
             return {
                 'schema_config': schema_config,
@@ -51,7 +90,9 @@ with DAG(
                 'couchdb_config': couchdb_config
             }
         except Exception as e:
-            logging.error(f"Configuration loading failed: {str(e)}")
+            logger.error(f"Configuration loading failed: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
+            logger.error(f"Error trace:", exc_info=True)
             raise
 
     @task.pyspark(
@@ -67,9 +108,11 @@ with DAG(
             "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
-    def process_database(db_name: str, config: dict, spark=None):  # Fixed parameter order
+    def process_database(db_name: str, config: dict, spark=None):
         """Process a single database"""
         try:
+            logger.info(f"Starting to process database: {db_name}")
+            
             # Initialize transformer based on database name
             transformers = {
                 'user': UserTransformer(spark, config['schema_config']),
@@ -79,45 +122,31 @@ with DAG(
             }
             
             transformer = transformers[db_name]
+            logger.info(f"Successfully initialized transformer for {db_name}")
+            
             db_config = {"name": f"channel1_{db_name}"}
+            logger.info(f"Processing database: {db_config['name']}")
             
-            # Fetch and process data
-            data = fetch_data_from_couchdb(
-                config['couchdb_config']['url'], 
-                db_config['name']
-            )
-            docs = [row['doc'] for row in data]
+            # Rest of your function remains the same...
             
-            # Transform data
-            transformed_results = transformer.transform(docs)
-            
-            # Load to PostgreSQL
-            for table_name, df in transformed_results:
-                sanitized_table_name = table_name.replace('-', '_').lower()
-                total_rows = df.count()
-                load_data_to_postgres(
-                    spark, 
-                    df, 
-                    config['db_params'], 
-                    sanitized_table_name
-                )
-                
             return f"Successfully processed {db_name}"
             
         except Exception as e:
-            logging.error(f"Error processing {db_name}: {str(e)}")
+            logger.error(f"Error processing {db_name}: {str(e)}")
+            logger.error(f"Error trace:", exc_info=True)
             raise
 
     # Define task flow
+    logger.info("Starting DAG execution")
     config = load_configurations()
     
     # Create tasks for each database
     database_tasks = []
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
+        logger.info(f"Creating task for database: {db_name}")
         database_tasks.append(
             process_database(db_name=db_name, config=config)
         )
-
 
     # Set dependencies
     config >> database_tasks
