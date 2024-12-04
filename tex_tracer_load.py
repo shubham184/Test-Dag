@@ -108,27 +108,51 @@ with DAG(
         try:
             logger.info(f"Starting to process database: {db_name}")
             
-            # Initialize transformer based on database name
-            transformers = {
-                'user': UserTransformer(spark, config['schema_config']),
-                'company': CompanyTransformer(spark, config['schema_config']),
-                'order': OrderTransformer(spark, config['schema_config']),
-                'orderline-steps': OrderlineStepsTransformer(spark, config['schema_config'])
+            # Initialize only the transformer we need
+            transformer_mapping = {
+                'user': UserTransformer,
+                'company': CompanyTransformer,
+                'order': OrderTransformer,
+                'orderline-steps': OrderlineStepsTransformer
             }
             
-            transformer = transformers[db_name]
+            if db_name not in transformer_mapping:
+                raise ValueError(f"Unknown database type: {db_name}")
+                
+            # Create only the transformer we need
+            transformer_class = transformer_mapping[db_name]
+            transformer = transformer_class(spark, config['schema_config'])
             logger.info(f"Successfully initialized transformer for {db_name}")
             
             db_config = {"name": f"channel1_{db_name}"}
             logger.info(f"Processing database: {db_config['name']}")
             
-            # Rest of your function remains the same...
+            # Fetch and process data
+            data = fetch_data_from_couchdb(
+                config['couchdb_config']['url'], 
+                db_config['name']
+            )
+            docs = [row['doc'] for row in data]
             
+            # Transform data
+            transformed_results = transformer.transform(docs)
+            
+            # Load to PostgreSQL
+            for table_name, df in transformed_results:
+                sanitized_table_name = table_name.replace('-', '_').lower()
+                total_rows = df.count()
+                load_data_to_postgres(
+                    spark, 
+                    df, 
+                    config['db_params'], 
+                    sanitized_table_name
+                )
+                
             return f"Successfully processed {db_name}"
             
         except Exception as e:
             logger.error(f"Error processing {db_name}: {str(e)}")
-            logger.error(f"Error trace:", exc_info=True)
+            logger.error("Error trace:", exc_info=True)
             raise
 
     # Define task flow
