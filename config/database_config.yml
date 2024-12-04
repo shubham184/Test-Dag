@@ -1,11 +1,11 @@
 # Development database configuration
 development:
   postgres:
-    host: 'localhost'
+    host: 'ttdata.postgres.database.azure.com'
     port: '5432'
-    user: 'admin'
-    password: 'admin'
-    database: 'tt-spark-dev'
+    user: 'ttdata'
+    password: 'VHhWZVE0bk44MlNTaVlIb3N3cU9VUlp2UURhTDRLcE5Fd0R4TWQ3M0tja0llWHpTNWNVNkxpQzIK'
+    database: 'couchdb_new'
   
   couchdb:
     url: 'https://couchdb:4Ze7WOaVB3OoWYH13seSIdt9@tex-tracer.redledger.eu'
