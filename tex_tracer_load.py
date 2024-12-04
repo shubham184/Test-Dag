@@ -90,6 +90,90 @@ with DAG(
             logger.error("Stack trace:", exc_info=True)
             raise
 
+    # @task.pyspark(
+    #     conn_id="spark-local",
+    #     config_kwargs={
+    #         "spark.kubernetes.driver.request.cores": "0.5",
+    #         "spark.kubernetes.driver.limit.cores": "1",
+    #         "spark.driver.memory": "1g",
+    #         "spark.kubernetes.executor.request.cores": "0.5",
+    #         "spark.kubernetes.executor.limit.cores": "1",
+    #         "spark.executor.memory": "1g",
+    #         "spark.executor.instances": "1",
+    #         "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
+    #     }
+    # )
+    # def process_database(db_name: str, config: dict, spark=None):
+    #     """Process a single database"""
+    #     try:
+    #         logger.info(f"Starting to process database: {db_name}")
+            
+    #         # Initialize only the transformer we need
+    #         transformer_mapping = {
+    #             # 'user': UserTransformer,
+    #             'company': CompanyTransformer,
+    #             # 'order': OrderTransformer,
+    #             # 'orderline-steps': OrderlineStepsTransformer
+    #         }
+            
+    #         if db_name not in transformer_mapping:
+    #             raise ValueError(f"Unknown database type: {db_name}")
+                
+    #         # Create only the transformer we need
+    #         transformer_class = transformer_mapping[db_name]
+    #         transformer = transformer_class(spark, config['schema_config'])
+    #         logger.info(f"Successfully initialized transformer for {db_name}")
+            
+    #         db_config = {"name": f"channel1_{db_name}"}
+    #         logger.info(f"Processing database: {db_config['name']}")
+            
+    #         # Fetch and process data
+    #         data = fetch_data_from_couchdb(
+    #             config['couchdb_config']['url'], 
+    #             db_config['name']
+    #         )
+    #         docs = [row['doc'] for row in data]
+            
+    #         # Transform data
+    #         transformed_results = transformer.transform(docs)
+            
+    #         # Load to PostgreSQL
+    #         for table_name, df in transformed_results:
+    #             sanitized_table_name = table_name.replace('-', '_').lower()
+    #             total_rows = df.count()
+    #             load_data_to_postgres(
+    #                 spark, 
+    #                 df, 
+    #                 config['db_params'], 
+    #                 sanitized_table_name
+    #             )
+                
+    #         return f"Successfully processed {db_name}"
+            
+    #     except Exception as e:
+    #         logger.error(f"Error processing {db_name}: {str(e)}")
+    #         logger.error("Error trace:", exc_info=True)
+    #         raise
+
+    # Define task flow
+    logger.info("Starting DAG execution")
+    config = load_configurations()
+
+    @task
+    def extract_from_couchdb(db_name: str, config: dict):
+        """Extract data from CouchDB for a given database"""
+        try:
+            logger.info(f"Extracting data for: {db_name}")
+            db_config = {"name": f"channel1_{db_name}"}
+            data = fetch_data_from_couchdb(
+                config['couchdb_config']['url'], 
+                db_config['name']
+            )
+            return [row['doc'] for row in data]
+        except Exception as e:
+            logger.error(f"Error extracting data for {db_name}: {str(e)}")
+            raise
+
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
@@ -103,41 +187,22 @@ with DAG(
             "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
         }
     )
-    def process_database(db_name: str, config: dict, spark=None):
-        """Process a single database"""
+    def transform_and_load(db_name: str, docs: list, config: dict, spark=None):
+        """Transform and load data to PostgreSQL"""
         try:
-            logger.info(f"Starting to process database: {db_name}")
+            logger.info(f"Transforming and loading data for: {db_name}")
             
-            # Initialize only the transformer we need
             transformer_mapping = {
-                # 'user': UserTransformer,
                 'company': CompanyTransformer,
-                # 'order': OrderTransformer,
-                # 'orderline-steps': OrderlineStepsTransformer
+                # Add other transformers as needed
             }
             
             if db_name not in transformer_mapping:
                 raise ValueError(f"Unknown database type: {db_name}")
-                
-            # Create only the transformer we need
-            transformer_class = transformer_mapping[db_name]
-            transformer = transformer_class(spark, config['schema_config'])
-            logger.info(f"Successfully initialized transformer for {db_name}")
             
-            db_config = {"name": f"channel1_{db_name}"}
-            logger.info(f"Processing database: {db_config['name']}")
-            
-            # Fetch and process data
-            data = fetch_data_from_couchdb(
-                config['couchdb_config']['url'], 
-                db_config['name']
-            )
-            docs = [row['doc'] for row in data]
-            
-            # Transform data
+            transformer = transformer_mapping[db_name](spark, config['schema_config'])
             transformed_results = transformer.transform(docs)
             
-            # Load to PostgreSQL
             for table_name, df in transformed_results:
                 sanitized_table_name = table_name.replace('-', '_').lower()
                 total_rows = df.count()
@@ -147,27 +212,31 @@ with DAG(
                     config['db_params'], 
                     sanitized_table_name
                 )
-                
-            return f"Successfully processed {db_name}"
             
+            return f"Successfully processed {db_name}"
         except Exception as e:
-            logger.error(f"Error processing {db_name}: {str(e)}")
-            logger.error("Error trace:", exc_info=True)
+            logger.error(f"Error in transform and load for {db_name}: {str(e)}")
             raise
 
-    # Define task flow
-    logger.info("Starting DAG execution")
-    config = load_configurations()
-
-    # Create tasks for each database with descriptive names
-    database_tasks = []
+    # Create dynamic tasks
+    extraction_tasks = []
+    transform_load_tasks = []
+    
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
-        logger.info(f"Creating task for database: {db_name}")
-        task = process_database.override(task_id=f"process_{db_name}_database")(
-            db_name=db_name, 
-            config=config
-        )
-        database_tasks.append(task)
+        logger.info(f"Creating tasks for database: {db_name}")
+        
+        # Create extraction task
+        extract_task = extract_from_couchdb.override(
+            task_id=f"extract_{db_name}_data"
+        )(db_name=db_name, config=config)
+        
+        # Create transform and load task
+        transform_load_task = transform_and_load.override(
+            task_id=f"transform_load_{db_name}"
+        )(db_name=db_name, docs=extract_task, config=config)
+        
+        extraction_tasks.append(extract_task)
+        transform_load_tasks.append(transform_load_task)
 
     # Set dependencies
-    config >> database_tasks
+    config >> extraction_tasks >> transform_load_tasks
