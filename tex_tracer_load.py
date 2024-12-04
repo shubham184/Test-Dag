@@ -177,14 +177,19 @@ with DAG(
     @task.pyspark(
         conn_id="spark-local",
         config_kwargs={
-            "spark.kubernetes.driver.request.cores": "0.5",
+            "spark.kubernetes.driver.request.cores": "1",
             "spark.kubernetes.driver.limit.cores": "1",
-            "spark.driver.memory": "1g",
-            "spark.kubernetes.executor.request.cores": "0.5",
+            "spark.driver.memory": "5g",
+            "spark.kubernetes.executor.request.cores": "1",
             "spark.kubernetes.executor.limit.cores": "1",
-            "spark.executor.memory": "1g",
+            "spark.executor.memory": "5g",
             "spark.executor.instances": "1",
-            "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
+            "spark.kubernetes.container.image.pullPolicy": "IfNotPresent",
+            "spark.sql.shuffle.partitions": "10",  # Controls number of partitions for shuffles
+            "spark.default.parallelism": "4",      # Controls parallelism for operations like joins
+            "spark.sql.adaptive.enabled": "true",  # Enables adaptive query execution
+            "spark.sql.adaptive.coalescePartitions.enabled": "true",  # Coalesces partitions adaptively
+            "spark.sql.adaptive.skewJoin.enabled": "true"  # Handles skewed joins better
         }
     )
     def transform_and_load(db_name: str, docs: list, config: dict, spark=None):
