@@ -193,10 +193,10 @@ with DAG(
             logger.info(f"Transforming and loading data for: {db_name}")
             
             transformer_mapping = {
-                'company': CompanyTransformer,
+                # 'company': CompanyTransformer,
                 'order': OrderTransformer,
-                'orderline-steps': OrderlineStepsTransformer,
-                'user': UserTransformer
+                # 'orderline-steps': OrderlineStepsTransformer,
+                # 'user': UserTransformer
             }
             
             if db_name not in transformer_mapping:
@@ -224,7 +224,8 @@ with DAG(
     extraction_tasks = []
     transform_load_tasks = []
 
-    for db_name in ['user', 'company', 'order', 'orderline-steps']:
+    # for db_name in ['user', 'company', 'order', 'orderline-steps']:
+    for db_name in ['order']:
         logger.info(f"Creating tasks for database: {db_name}")
         
         # Create extraction task

@@ -158,3 +158,7 @@ class BaseNestedTransformer(BaseTransformer):
     def get_table_names(self) -> List[str]:
         """Return the table names this transformer is responsible for"""
         return [self.table_config['table_name']]
+    
+    def transform_docs_to_dataframes(self, docs: list) -> List[DataFrame]:
+        """Bridge method to align with BaseTableTransformer interface"""
+        return list(self.transform(docs))
