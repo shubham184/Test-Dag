@@ -194,7 +194,9 @@ with DAG(
             
             transformer_mapping = {
                 'company': CompanyTransformer,
-                # Add other transformers as needed
+                'order': OrderTransformer,
+                'orderline-steps': OrderlineStepsTransformer,
+                'user': UserTransformer
             }
             
             if db_name not in transformer_mapping:
@@ -209,7 +211,7 @@ with DAG(
                 load_data_to_postgres(
                     spark, 
                     df, 
-                    config['db_params'], 
+                    config['db_params'],
                     sanitized_table_name
                 )
             
@@ -217,10 +219,6 @@ with DAG(
         except Exception as e:
             logger.error(f"Error in transform and load for {db_name}: {str(e)}")
             raise
-
-    # Define task flow
-    logger.info("Starting DAG execution")
-    config = load_configurations()
 
     # Create dynamic tasks
     extraction_tasks = []
