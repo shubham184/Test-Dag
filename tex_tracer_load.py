@@ -158,14 +158,16 @@ with DAG(
     # Define task flow
     logger.info("Starting DAG execution")
     config = load_configurations()
-    
-    # Create tasks for each database
+
+    # Create tasks for each database with descriptive names
     database_tasks = []
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
         logger.info(f"Creating task for database: {db_name}")
-        database_tasks.append(
-            process_database(db_name=db_name, config=config)
+        task = process_database.override(task_id=f"process_{db_name}_database")(
+            db_name=db_name, 
+            config=config
         )
+        database_tasks.append(task)
 
     # Set dependencies
     config >> database_tasks
