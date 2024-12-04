@@ -218,10 +218,14 @@ with DAG(
             logger.error(f"Error in transform and load for {db_name}: {str(e)}")
             raise
 
+    # Define task flow
+    logger.info("Starting DAG execution")
+    config = load_configurations()
+
     # Create dynamic tasks
     extraction_tasks = []
     transform_load_tasks = []
-    
+
     for db_name in ['user', 'company', 'order', 'orderline-steps']:
         logger.info(f"Creating tasks for database: {db_name}")
         
@@ -235,8 +239,5 @@ with DAG(
             task_id=f"transform_load_{db_name}"
         )(db_name=db_name, docs=extract_task, config=config)
         
-        extraction_tasks.append(extract_task)
-        transform_load_tasks.append(transform_load_task)
-
-    # Set dependencies
-    config >> extraction_tasks >> transform_load_tasks
+        # Set dependencies for this database's pipeline
+        config >> extract_task >> transform_load_task
