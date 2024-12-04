@@ -110,10 +110,10 @@ with DAG(
             
             # Initialize only the transformer we need
             transformer_mapping = {
-                'user': UserTransformer,
+                # 'user': UserTransformer,
                 'company': CompanyTransformer,
-                'order': OrderTransformer,
-                'orderline-steps': OrderlineStepsTransformer
+                # 'order': OrderTransformer,
+                # 'orderline-steps': OrderlineStepsTransformer
             }
             
             if db_name not in transformer_mapping:
